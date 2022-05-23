@@ -4,6 +4,7 @@ from tile import Tile
 from player import Player
 from debug import debug
 from support import *
+from random import choice
 
 class Level:
     def __init__(self):
@@ -16,10 +17,20 @@ class Level:
         self.create_map()
 
     def create_map(self):
+
         #map dictionary
         layouts = \
         {
-            'boundary' : import_csv_layout('map/map_FloorBlocks.csv')
+            'boundary' : import_csv_layout('map/map_FloorBlocks.csv'),
+            'grass' : import_csv_layout('map/map_Grass.csv'),
+            'object' : import_csv_layout('map/map_Objects.csv')
+        }
+
+        #graphics dictionary
+        graphics = \
+        {
+            'grass' : import_folder('graphics/grass'),
+            'objects' : import_folder('graphics/objects')
         }
     
         '''
@@ -39,8 +50,14 @@ class Level:
                     if col != '-1':
                         x = col_index * TILESIZE
                         y = row_index * TILESIZE
-                        if style == 'boundary':
+                        if style == 'boundary': #create boundary tile
                             Tile((x, y), tuple([self.obstacle_sprites]), 'invisible')
+                        if style == 'grass': #create grass tile
+                            random_grass_image = choice(graphics['grass'])
+                            Tile((x, y), tuple([self.visible_sprites]), 'grass', random_grass_image)
+                        if style == 'object': #create object tile
+                            surface = graphics['objects'][int(col)]
+                            Tile((x, y), tuple([self.visible_sprites, self.obstacle_sprites]), 'object', surface)
 
         self.player = Player((2000, 1430), tuple([self.visible_sprites]), self.obstacle_sprites)
 
