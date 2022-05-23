@@ -65,7 +65,8 @@ class Level:
         #update and draw level
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        debug(self.player.direction)
+        #debug(self.player.direction)
+        debug(self.player.status)
 
 #CAMERA_AND_OVERLAP#
 class YSortCameraGroup(pygame.sprite.Group):
