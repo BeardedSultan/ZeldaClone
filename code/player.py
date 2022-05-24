@@ -30,7 +30,7 @@ class Player(pygame.sprite.Sprite):
         self.weapon_index = 0
         self.weapon = list(weapon_data.keys())[self.weapon_index]
         self.destroy_attack = destroy_attack
-        self.can_swtich_weapon = True
+        self.can_switch_weapon = True
         self.weapon_switch_time = None
         self.switch_duration_cooldown = 200
 
@@ -101,8 +101,8 @@ class Player(pygame.sprite.Sprite):
                 print('firebolt')
 
             #WEAPON_SWAP#
-            if keys[pygame.K_q] and self.can_swtich_weapon:
-                self.can_swtich_weapon = False
+            if keys[pygame.K_q] and self.can_switch_weapon:
+                self.can_switch_weapon = False
                 self.weapon_switch_time = pygame.time.get_ticks()
     
                 if self.weapon_index < len(list(weapon_data.keys())) - 1:
@@ -170,9 +170,9 @@ class Player(pygame.sprite.Sprite):
                 self.attacking = False
                 self.destroy_attack()
         
-        if not self.can_swtich_weapon:
+        if not self.can_switch_weapon:
             if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
-                self.can_swtich_weapon = True
+                self.can_switch_weapon = True
 
     def animate(self):
         animation = self.animations[self.status]
