@@ -7,6 +7,7 @@ from support import *
 from random import choice
 from weapon import *
 from ui import *
+from enemy import Enemy
 
 class Level:
     def __init__(self):
@@ -31,7 +32,8 @@ class Level:
         {
             'boundary' : import_csv_layout('map/map_FloorBlocks.csv'),
             'grass' : import_csv_layout('map/map_Grass.csv'),
-            'object' : import_csv_layout('map/map_Objects.csv')
+            'object' : import_csv_layout('map/map_Objects.csv'),
+            'entities' : import_csv_layout('map/map_Entities.csv')
         }
 
         #graphics dictionary
@@ -63,17 +65,28 @@ class Level:
                         if style == 'grass': #create grass tile
                             random_grass_image = choice(graphics['grass'])
                             Tile((x, y), tuple([self.visible_sprites]), 'grass', random_grass_image)
+
                         if style == 'object': #create object tile
                             surface = graphics['objects'][int(col)]
                             Tile((x, y), tuple([self.visible_sprites, self.obstacle_sprites]), 'object', surface)
 
-        self.player = Player(
-            (2000, 1430), 
-            tuple([self.visible_sprites]), 
-            self.obstacle_sprites, 
-            self.create_attack, 
-            self.destroy_attack,
-            self.create_magic)
+                        if style == 'entities': #create entities tile
+                            if col == '394':
+                                #create player
+                                self.player = Player(
+                                    (x, y), 
+                                    tuple([self.visible_sprites]), 
+                                    self.obstacle_sprites, 
+                                    self.create_attack, 
+                                    self.destroy_attack,
+                                    self.create_magic)
+                            else:
+                                if col == '390': monster_name = 'bamboo'
+                                elif col == '391': monster_name = 'spirit'
+                                elif col == '392': monster_name = 'raccoon'
+                                elif col == '393': monster_name = 'squid'
+
+                                Enemy(monster_name, (x, y), tuple([self.visible_sprites]), self.obstacle_sprites)
 
     #attack is inside Player, but weapon needs to be in level, so we're making this method to circumvent that
     def create_attack(self): 

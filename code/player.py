@@ -1,8 +1,9 @@
 import pygame
 from settings import *
 from support import import_folder
+from entity import Entity
 
-class Player(pygame.sprite.Sprite):
+class Player(Entity):
     #__INIT__#
     def __init__(self, pos, groups, obstacle_sprites, create_attack, destroy_attack, create_magic):
         for group in groups:
@@ -14,11 +15,11 @@ class Player(pygame.sprite.Sprite):
         #graphics, animations
         self.import_player_assets()
         self.status = 'down'
-        self.frame_index = 0
-        self.animation_speed = 0.15
+        #self.frame_index = 0
+        #self.animation_speed = 0.15
 
         #movement
-        self.direction = pygame.math.Vector2() #(x, y)
+        #self.direction = pygame.math.Vector2() #(x, y)
         self.attacking = False
         self.attack_cooldown = 400
         self.attack_time = None
@@ -154,6 +155,8 @@ class Player(pygame.sprite.Sprite):
             if 'attack' in self.status:     
                 self.status = self.status.replace('_attack', '') #don't want the attack animation to stick
 
+    '''
+    #copy to Entity class
     #MOVEMENT_&_SPEED#
     def move(self, speed):
         #normalize direction vector to keep diagonal speed the same
@@ -184,7 +187,8 @@ class Player(pygame.sprite.Sprite):
                         self.hitbox.bottom = sprite.hitbox.top
                     elif self.direction.y < 0: #moving up
                         self.hitbox.top = sprite.hitbox.bottom   
-    
+    '''
+
     def cooldowns(self):
         current_time = pygame.time.get_ticks()
 
