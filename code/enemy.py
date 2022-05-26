@@ -31,6 +31,11 @@ class Enemy(Entity):
         self.notice_radius = monster_info['notice_radius']
         self.attack_type = monster_info['attack_type']
 
+        #player interaction
+        self.can_attack = True
+        self.attack_cooldown = 400
+        self.attack_time = None
+
 
     def import_graphics(self, name):
         self.animations = \
@@ -45,15 +50,66 @@ class Enemy(Entity):
         for animation in self.animations.keys():
             self.animations[animation] = import_folder(main_path + animation) #animation is either idle, move or attack
 
-    def get_status(self, player):
-        distance_to_player = ???
+    def get_player_distance_and_direction(self, player):
+        enemy_vec = pygame.math.Vector2(self.rect.center)
+        player_vec = pygame.math.Vector2(player.rect.center)
+        distance = (player_vec - enemy_vec).magnitude() #convert vector into distance
+        
+        if distance > 0:
+            direction = (player_vec - enemy_vec).normalize() #normalize to get magnitude to 1
+        else:
+            direction = pygame.math.Vector2()
 
-        if distance_to_player <= self.attack_radius:
+        return (distance, direction)
+
+    def get_status(self, player):
+        distance = self.get_player_distance_and_direction(player)[0]
+
+        if distance <= self.attack_radius and self.can_attack:
+            if self.status != 'attack':
+                self.frame_index = 0
             self.status = 'attack'
-        elif distance_to_player <= self.notice_radius:
+        elif distance <= self.notice_radius:
             self.status = 'move'
         else:
             self.status = 'idle'
+
+    def actions(self, player):
+        if self.status == 'attack':
+            self.attack_time = pygame.time.get_ticks()
+            print('attack')
+        elif self.status == 'move':
+            self.direction = self.get_player_distance_and_direction(player)[1]
+        else: #idle, stand still in place
+            self.direction = pygame.math.Vector2()
+
+    def cooldown(self):
+        if not self.can_attack:   
+            current_time = pygame.time.get_ticks()
+            if current_time - self.attack_time >= self.attack_cooldown:
+                self.can_attack = True
     
+    def animate(self):
+        animation = self.animations[self.status]
+
+        #loop over frame indices
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(animation):
+            if self.status == 'attack':
+                self.attacking = True
+                self.can_attack = False
+            self.frame_index = 0
+        
+        #set image for animation
+        self.image = animation[int(self.frame_index)]
+        self.rect = self.image.get_rect(center = self.hitbox.center)
+
     def update(self):
         self.move(self.speed)
+        self.animate()
+        self.cooldown()
+
+    def enemy_update(self, player):
+        self.get_status(player)
+        self.actions(player)
+        
