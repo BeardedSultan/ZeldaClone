@@ -67,7 +67,7 @@ class Level:
                             Tile((x, y), tuple([self.obstacle_sprites]), 'invisible')
                         if style == 'grass': #create grass tile
                             random_grass_image = choice(graphics['grass'])
-                            Tile((x, y), tuple([self.visible_sprites, self.attackable_sprites]), 'grass', random_grass_image)
+                            Tile((x, y), tuple([self.visible_sprites, self.obstacle_sprites, self.attackable_sprites]), 'grass', random_grass_image)
 
                         if style == 'object': #create object tile
                             surface = graphics['objects'][int(col)]
@@ -96,9 +96,10 @@ class Level:
         self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
 
     def create_magic(self, style, strength, cost): 
-        print(style)
-        print(strength)
-        print(cost)
+        # print(style)
+        # print(strength)
+        # print(cost)
+        pass
     
     def destroy_attack(self):
         if self.current_attack:
@@ -109,14 +110,20 @@ class Level:
         #cycle through attack sprites and check if they are colliding with attackable
         if self.attack_sprites:
             for attack_sprite in self.attack_sprites:
-                collision_sprites = pygame.sprite.spritecollide(attack_sprite, self.attackable_sprites, dokill=True)
-
+                collision_sprites = pygame.sprite.spritecollide(attack_sprite, self.attackable_sprites, False)
+                if collision_sprites:
+                    for target_sprite in collision_sprites:
+                        if target_sprite.sprite_type == 'grass':
+                            target_sprite.kill()
+                        else:
+                            target_sprite.get_damage(self.player, attack_sprite.sprite_type)
 
     def run(self):
         #update and draw level
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
+        self.player_attack_logic()
         #debug(self.player.direction)
         #debug(self.player.status)
         self.ui.display(self.player)
