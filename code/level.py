@@ -4,10 +4,11 @@ from tile import Tile
 from player import Player
 from debug import debug
 from support import *
-from random import choice
+from random import choice, randint
 from weapon import *
 from ui import *
 from enemy import Enemy
+from particles import AnimationPlayer
 
 class Level:
     def __init__(self):
@@ -27,6 +28,9 @@ class Level:
 
         #user interface
         self.ui = UI()
+
+        #particles
+        self.animation_player = AnimationPlayer()
 
     def create_map(self):
 
@@ -89,7 +93,7 @@ class Level:
                                 elif col == '392': monster_name = 'raccoon'
                                 elif col == '393': monster_name = 'squid'
 
-                                Enemy(monster_name, (x, y), tuple([self.visible_sprites, self.attackable_sprites]), self.obstacle_sprites)
+                                Enemy(monster_name, (x, y), tuple([self.visible_sprites, self.attackable_sprites]), self.obstacle_sprites, self.damage_player, self.trigger_death_particles)
 
     #attack is inside Player, but weapon needs to be in level, so we're making this method to circumvent that
     def create_attack(self): 
@@ -114,15 +118,34 @@ class Level:
                 if collision_sprites:
                     for target_sprite in collision_sprites:
                         if target_sprite.sprite_type == 'grass':
+                            pos = target_sprite.rect.center
+                            offset = pygame.math.Vector2(0, 50)
+                            for leaf in range(randint(3, 6)):
+                                self.animation_player.create_grass_particles(pos - offset, [self.visible_sprites])
                             target_sprite.kill()
                         else:
                             target_sprite.get_damage(self.player, attack_sprite.sprite_type)
+
+    def damage_player(self, amount, attack_type):
+        if self.player.vulnerable:
+            self.player.health -= amount
+            self.vulnerable = False
+            print('A', self.vulnerable)
+            self.hurt_time = pygame.time.get_ticks()
+            self.animation_player.create_particles(attack_type, self.player.rect.center, [self.visible_sprites])
+
+    def trigger_death_particles(self, pos, particle_type):
+        self.animation_player.create_particles(particle_type, pos, [self.visible_sprites])
+    # def check_player_death(self):
+    #     if self.player.health <= 0:
+    #         self.player.kill()
 
     def run(self):
         #update and draw level
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
+        #self.check_player_death()
         self.player_attack_logic()
         #debug(self.player.direction)
         #debug(self.player.status)

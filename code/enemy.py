@@ -4,7 +4,7 @@ from entity import Entity
 from support import *
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacle_sprites):
+    def __init__(self, monster_name, pos, groups, obstacle_sprites, damage_player, trigger_death_particles):
         #general setup
         super().__init__(groups)
         self.sprite_type = 'enemy'
@@ -33,8 +33,10 @@ class Enemy(Entity):
 
         #player interaction
         self.can_attack = True
-        self.attack_cooldown = 400
+        self.attack_cooldown = 1000
         self.attack_time = None
+        self.damage_player = damage_player
+        self.trigger_death_particles = trigger_death_particles
 
         #invulnerability timer
         self.vulnerable = True
@@ -82,10 +84,32 @@ class Enemy(Entity):
     def actions(self, player):
         if self.status == 'attack':
             self.attack_time = pygame.time.get_ticks()
+            self.damage_player(self.attack_damage, self.attack_type)
         elif self.status == 'move':
             self.direction = self.get_player_distance_and_direction(player)[1]
         else: #idle, stand still in place
             self.direction = pygame.math.Vector2()
+
+    def animate(self):
+        animation = self.animations[self.status]
+
+        #loop over frame indices
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(animation):
+            if self.status == 'attack':
+                self.can_attack = False
+            self.frame_index = 0
+        
+        #set image for animation
+        self.image = animation[int(self.frame_index)]
+        self.rect = self.image.get_rect(center = self.hitbox.center)
+
+        #flicker on hit
+        if not self.vulnerable:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255) #transparency
 
     def cooldowns(self):
         current_time = pygame.time.get_ticks()
@@ -97,26 +121,12 @@ class Enemy(Entity):
             if current_time - self.hit_time >= self.invincibility_duration:
                 self.vulnerable = True
     
-    def animate(self):
-        animation = self.animations[self.status]
-
-        #loop over frame indices
-        self.frame_index += self.animation_speed
-        if self.frame_index >= len(animation):
-            if self.status == 'attack':
-                self.attacking = True
-                self.can_attack = False
-            self.frame_index = 0
-        
-        #set image for animation
-        self.image = animation[int(self.frame_index)]
-        self.rect = self.image.get_rect(center = self.hitbox.center)
 
     def get_damage(self, player, attack_type):
         if self.vulnerable:
+            self.direction = self.get_player_distance_and_direction(player)[1]
             if attack_type == 'weapon':
                 self.health -= player.get_full_weapon_damage()
-                print(self.health)
 
             self.hit_time = pygame.time.get_ticks()
             self.vulnerable = False
@@ -124,13 +134,19 @@ class Enemy(Entity):
     def check_death(self):
         if self.health <= 0:
             self.kill()
+            self.trigger_death_particles(self.rect.center, self.monster_name)     
+        
+    def enemy_knockback(self):
+        if not self.vulnerable:
+            self.direction *= -self.resistance
 
     def update(self):
+        self.enemy_knockback()
         self.move(self.speed)
         self.animate()
         self.cooldowns()
+        self.check_death()
 
     def enemy_update(self, player):
         self.get_status(player)
         self.actions(player)
-        self.check_death()
