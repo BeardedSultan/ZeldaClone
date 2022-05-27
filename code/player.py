@@ -6,8 +6,8 @@ from entity import Entity
 class Player(Entity):
     #__INIT__#
     def __init__(self, pos, groups, obstacle_sprites, create_attack, destroy_attack, create_magic):
-        for group in groups:
-            super().__init__(group)
+        #had unnecessary for loop slowed the whole thing
+        super().__init__(groups)
         self.image = pygame.image.load('graphics/test/player.png').convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = self.rect.inflate(0, -26)
@@ -15,22 +15,18 @@ class Player(Entity):
         #graphics, animations
         self.import_player_assets()
         self.status = 'down'
-        #self.frame_index = 0
-        #self.animation_speed = 0.15
 
         #movement
-        #self.direction = pygame.math.Vector2() #(x, y)
         self.attacking = False
         self.attack_cooldown = 400
         self.attack_time = None
-
         self.obstacle_sprites = obstacle_sprites
 
         #weapon
         self.create_attack = create_attack
+        self.destroy_attack = destroy_attack
         self.weapon_index = 0
         self.weapon = list(weapon_data.keys())[self.weapon_index]
-        self.destroy_attack = destroy_attack
         self.can_switch_weapon = True
         self.weapon_switch_time = None
         self.switch_duration_cooldown = 200
@@ -147,12 +143,12 @@ class Player(Entity):
                 self.status = self.status + '_idle'
 
         #attack status
-        if self.attacking == True:
+        if self.attacking:
             self.direction.x = 0
             self.direction.y = 0
             if not 'attack' in self.status:
                 if 'idle' in self.status:
-                    self.status = self.status.replace('idle', 'attack')
+                    self.status = self.status.replace('_idle', '_attack')
                 else:
                     self.status = self.status + '_attack'
         else:
@@ -212,7 +208,6 @@ class Player(Entity):
         if not self.vulnerable:
             if current_time - self.hurt_time >= self.invulnerability_duration:
                 self.vulnerable = True
-                print('B', self.vulnerable)
 
     def animate(self):
         animation = self.animations[self.status]
@@ -228,13 +223,12 @@ class Player(Entity):
 
         #flicker on hit
         #TODO this is buggy, idk why but first if statment is not entered
+        #TODO solved
         if not self.vulnerable:
-            print('C', self.vulnerable)
             alpha = self.wave_value()
             self.image.set_alpha(alpha)
         else:
             self.image.set_alpha(255) #transparency
-            print('D', self.vulnerable)
 
     def get_full_weapon_damage(self):
         base_damage = self.stats['attack']

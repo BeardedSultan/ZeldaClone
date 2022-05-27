@@ -33,8 +33,8 @@ class Enemy(Entity):
 
         #player interaction
         self.can_attack = True
-        self.attack_cooldown = 1000
         self.attack_time = None
+        self.attack_cooldown = 400
         self.damage_player = damage_player
         self.trigger_death_particles = trigger_death_particles
 

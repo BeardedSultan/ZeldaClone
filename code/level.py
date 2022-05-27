@@ -5,8 +5,8 @@ from player import Player
 from debug import debug
 from support import *
 from random import choice, randint
-from weapon import *
-from ui import *
+from weapon import Weapon
+from ui import UI
 from enemy import Enemy
 from particles import AnimationPlayer
 
@@ -49,17 +49,6 @@ class Level:
             'grass' : import_folder('graphics/grass'),
             'objects' : import_folder('graphics/objects')
         }
-    
-        '''
-        for row_index, row in enumerate(WORLD_MAP):
-            for col_index, col in enumerate(row):
-                x = col_index * TILESIZE
-                y = row_index * TILESIZE
-                if col == 'x':
-                    Tile((x, y), tuple([self.visible_sprites, self.obstacle_sprites]))
-                if col == 'p':
-                    self.player = Player((x, y), tuple([self.visible_sprites]), self.obstacle_sprites)
-        '''
 
         for style, layout in layouts.items():
             for row_index, row in enumerate(layout):
@@ -68,21 +57,21 @@ class Level:
                         x = col_index * TILESIZE
                         y = row_index * TILESIZE
                         if style == 'boundary': #create boundary tile
-                            Tile((x, y), tuple([self.obstacle_sprites]), 'invisible')
+                            Tile((x, y), [self.obstacle_sprites], 'invisible')
                         if style == 'grass': #create grass tile
                             random_grass_image = choice(graphics['grass'])
-                            Tile((x, y), tuple([self.visible_sprites, self.obstacle_sprites, self.attackable_sprites]), 'grass', random_grass_image)
+                            Tile((x, y), [self.visible_sprites, self.obstacle_sprites, self.attackable_sprites], 'grass', random_grass_image)
 
                         if style == 'object': #create object tile
                             surface = graphics['objects'][int(col)]
-                            Tile((x, y), tuple([self.visible_sprites, self.obstacle_sprites]), 'object', surface)
+                            Tile((x, y), [self.visible_sprites, self.obstacle_sprites], 'object', surface)
 
                         if style == 'entities': #create entities tile
                             if col == '394':
                                 #create player
                                 self.player = Player(
                                     (x, y), 
-                                    tuple([self.visible_sprites]), 
+                                    [self.visible_sprites], 
                                     self.obstacle_sprites, 
                                     self.create_attack, 
                                     self.destroy_attack,
@@ -93,17 +82,16 @@ class Level:
                                 elif col == '392': monster_name = 'raccoon'
                                 elif col == '393': monster_name = 'squid'
 
-                                Enemy(monster_name, (x, y), tuple([self.visible_sprites, self.attackable_sprites]), self.obstacle_sprites, self.damage_player, self.trigger_death_particles)
+                                Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites, self.damage_player, self.trigger_death_particles)
 
     #attack is inside Player, but weapon needs to be in level, so we're making this method to circumvent that
     def create_attack(self): 
         self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
 
     def create_magic(self, style, strength, cost): 
-        # print(style)
-        # print(strength)
-        # print(cost)
-        pass
+        print(style)
+        print(strength)
+        print(cost)
     
     def destroy_attack(self):
         if self.current_attack:
@@ -126,16 +114,16 @@ class Level:
                         else:
                             target_sprite.get_damage(self.player, attack_sprite.sprite_type)
 
-    def damage_player(self, amount, attack_type):
+    def damage_player(self, amount, attack_type): #forgot to access player in some places, its why flicker wasn't working
         if self.player.vulnerable:
             self.player.health -= amount
-            self.vulnerable = False
-            print('A', self.vulnerable)
-            self.hurt_time = pygame.time.get_ticks()
+            self.player.vulnerable = False
+            self.player.hurt_time = pygame.time.get_ticks()
             self.animation_player.create_particles(attack_type, self.player.rect.center, [self.visible_sprites])
 
     def trigger_death_particles(self, pos, particle_type):
-        self.animation_player.create_particles(particle_type, pos, [self.visible_sprites])
+        self.animation_player.create_particles(particle_type, pos, [self.visible_sprites]) #list?
+    
     # def check_player_death(self):
     #     if self.player.health <= 0:
     #         self.player.kill()
@@ -145,10 +133,7 @@ class Level:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
-        #self.check_player_death()
         self.player_attack_logic()
-        #debug(self.player.direction)
-        #debug(self.player.status)
         self.ui.display(self.player)
 
 #CAMERA_AND_OVERLAP#
