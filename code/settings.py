@@ -4,6 +4,14 @@ HEIGHT   = 1080
 FPS      = 60
 TILESIZE = 64
 
+HITBOX_OFFSET = \
+{
+    'player': -26,
+    'object': -40,
+    'grass': -10,
+    'invisible': 0
+}
+
 '''WORLD_MAP = \
 [
     ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'], #0
@@ -46,6 +54,12 @@ TEXT_COLOR = '#EEEEEE'
 HEALTH_COLOR = 'red'
 ENERGY_COLOR = 'blue'
 UI_BORDER_COLOR_ACTIVE = 'gold'
+
+#upgrade menu
+TEXT_COLOR_SELECTED = 'white'
+BAR_COLOR = '#EEEEEE'
+BAR_COLOR_SELECTED = '#111111'
+UPGRADE_BG_COLOR_SELECTED = 'pink'
 
 #weapon data
 weapon_data = \

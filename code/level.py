@@ -10,6 +10,7 @@ from ui import UI
 from enemy import Enemy
 from particles import AnimationPlayer
 from magic import MagicPlayer
+from upgrade import Upgrade
 
 class Level:
     def __init__(self):
@@ -29,10 +30,13 @@ class Level:
 
         #user interface
         self.ui = UI()
+        self.upgrade = Upgrade(self.player)
 
         #particles
         self.animation_player = AnimationPlayer()
         self.magic_player = MagicPlayer(self.animation_player)
+
+        self.game_paused = False
 
     def create_map(self):
 
@@ -84,7 +88,7 @@ class Level:
                                 elif col == '392': monster_name = 'raccoon'
                                 elif col == '393': monster_name = 'squid'
 
-                                Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites, self.damage_player, self.trigger_death_particles)
+                                Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites, self.damage_player, self.trigger_death_particles, self.gain_xp)
 
     #attack is inside Player, but weapon needs to be in level, so we're making this method to circumvent that
     def create_attack(self): 
@@ -132,15 +136,26 @@ class Level:
         if self.player.health <= 0:
             self.player.kill()
 
+    def gain_xp(self, amount):
+        self.player.exp += amount
+
+    def toggle_menu(self):
+        self.game_paused = not self.game_paused
+
     def run(self):
-        
         #update and draw level
         self.visible_sprites.custom_draw(self.player)
-        self.visible_sprites.update()
-        self.visible_sprites.enemy_update(self.player)
-        self.player_attack_logic()
         self.ui.display(self.player)
-        self.check_player_death()
+
+        if self.game_paused:
+            #pause game and display upgrade menu
+            self.upgrade.display()
+        else:
+            #run game
+            self.visible_sprites.update()
+            self.visible_sprites.enemy_update(self.player)
+            self.player_attack_logic()
+            self.check_player_death()
 
 #CAMERA_AND_OVERLAP#
 class YSortCameraGroup(pygame.sprite.Group):
