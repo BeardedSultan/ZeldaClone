@@ -9,6 +9,7 @@ from weapon import Weapon
 from ui import UI
 from enemy import Enemy
 from particles import AnimationPlayer
+from magic import MagicPlayer
 
 class Level:
     def __init__(self):
@@ -31,6 +32,7 @@ class Level:
 
         #particles
         self.animation_player = AnimationPlayer()
+        self.magic_player = MagicPlayer(self.animation_player)
 
     def create_map(self):
 
@@ -89,9 +91,11 @@ class Level:
         self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
 
     def create_magic(self, style, strength, cost): 
-        print(style)
-        print(strength)
-        print(cost)
+        if style == 'heal':
+            self.magic_player.heal(self.player, strength, cost, [self.visible_sprites])
+
+        if style == 'flame':
+            self.magic_player.flame(self.player, strength, cost, [self.visible_sprites, self.attack_sprites])
     
     def destroy_attack(self):
         if self.current_attack:
@@ -124,17 +128,19 @@ class Level:
     def trigger_death_particles(self, pos, particle_type):
         self.animation_player.create_particles(particle_type, pos, [self.visible_sprites]) #list?
     
-    # def check_player_death(self):
-    #     if self.player.health <= 0:
-    #         self.player.kill()
+    def check_player_death(self):
+        if self.player.health <= 0:
+            self.player.kill()
 
     def run(self):
+        
         #update and draw level
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
         self.player_attack_logic()
         self.ui.display(self.player)
+        self.check_player_death()
 
 #CAMERA_AND_OVERLAP#
 class YSortCameraGroup(pygame.sprite.Group):

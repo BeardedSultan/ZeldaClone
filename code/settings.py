@@ -44,7 +44,7 @@ TEXT_COLOR = '#EEEEEE'
 
 #ui colors
 HEALTH_COLOR = 'red'
-ENERGY_COLOR = 'green'
+ENERGY_COLOR = 'blue'
 UI_BORDER_COLOR_ACTIVE = 'gold'
 
 #weapon data
