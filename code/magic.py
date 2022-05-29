@@ -20,7 +20,7 @@ class MagicPlayer:
                     player.health += player.max_health - player.health
                 else:
                     player.health += strength
-            self.sounds['heal'].set_volume(0.01)
+            self.sounds['heal'].set_volume(0.05)
             self.sounds['heal'].play()
             player.energy -= cost
 
