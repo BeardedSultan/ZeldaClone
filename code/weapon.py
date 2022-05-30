@@ -1,5 +1,7 @@
+from telnetlib import STATUS
 import pygame
 from player import *
+from enemy import *
 
 class Weapon(pygame.sprite.Sprite):
     def __init__(self, player, groups):
@@ -20,3 +22,17 @@ class Weapon(pygame.sprite.Sprite):
             self.rect = self.image.get_rect(midbottom = player.rect.midtop + pygame.math.Vector2(-10, 0))
         elif direction == 'down':
             self.rect = self.image.get_rect(midtop = player.rect.midbottom + pygame.math.Vector2(-10, 0))
+
+class WeaponEnemy(pygame.sprite.Sprite):
+    def __init__(self, enemy, groups):
+        super().__init__(groups)
+
+        direction = 'down'
+        self.sprite_type = 'weapon'
+
+        #graphic
+        full_path = f'graphics/weapons/{enemy.weapon}/{direction}.png'
+        self.image = pygame.image.load(full_path).convert_alpha()
+
+        #placement
+        self.rect = self.image.get_rect(midtop = enemy.rect.midbottom + pygame.math.Vector2(-10, 0))

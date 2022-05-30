@@ -5,7 +5,7 @@ from player import Player
 from debug import debug
 from support import *
 from random import choice, randint
-from weapon import Weapon
+from weapon import *
 from ui import UI
 from enemy import Enemy
 from particles import AnimationPlayer
@@ -88,11 +88,20 @@ class Level:
                                 elif col == '392': monster_name = 'raccoon'
                                 elif col == '393': monster_name = 'squid'
 
-                                Enemy(monster_name, (x, y), [self.visible_sprites, self.attackable_sprites], self.obstacle_sprites, self.damage_player, self.trigger_death_particles, self.gain_xp)
+                                Enemy(monster_name, 
+                                      (x, y), 
+                                      [self.visible_sprites, self.attackable_sprites], 
+                                      self.obstacle_sprites, 
+                                      self.damage_player, 
+                                      self.trigger_death_particles, 
+                                      self.gain_xp)
 
     #attack is inside Player, but weapon needs to be in level, so we're making this method to circumvent that
     def create_attack(self): 
         self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
+
+    def create_enemy_attack(self): 
+        self.current_attack = WeaponEnemy(self.enemy, [self.visible_sprites, self.attack_sprites])
 
     def create_magic(self, style, strength, cost): 
         if style == 'heal':

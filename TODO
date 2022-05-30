@@ -5,6 +5,9 @@ mana plants
 potions
 more weapons, spells
 enemy weapons
+    - new enemy with weapon
+    - enemy will work like player
+    
 enemy spells
 magic and weapon collision on objects
 status effects on enemies (on fire, frozen, etc)
