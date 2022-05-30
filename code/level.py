@@ -37,6 +37,7 @@ class Level:
         self.magic_player = MagicPlayer(self.animation_player)
 
         self.game_paused = False
+        self.respawn = False
 
     def create_map(self):
 
@@ -147,6 +148,7 @@ class Level:
     def check_player_death(self):
         if self.player.health <= 0:
             self.player.kill()
+            self.respawn = True
 
     def gain_xp(self, amount):
         self.player.exp += amount
