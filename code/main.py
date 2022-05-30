@@ -33,19 +33,19 @@ class Game:
                         self.level.toggle_menu()
             if self.level.respawn:
                 audio = pygame.mixer.Sound('audio\playerdeath.wav')
-                audio.set_volume(0.01)
-                num = 1
+                audio.set_volume(0.05)
+                alpha = 255
                 fade = pygame.Surface((WIDTH, HEIGHT))
-                fade.fill((0, 0, 0))
-                for alpha in range(0, 255):
-                    while num == 1:
+                fade.fill((183, 14, 14))
+                while alpha != 0:
+                    if alpha == 255:
                         audio.play()
-                        num -= 1
                     fade.set_alpha(alpha)
-                    self.screen.fill((183, 14, 14))
+                    self.screen.fill((0, 0, 0))
                     self.screen.blit(fade, (0, 0))
                     pygame.display.update()
-                
+                    alpha -= 1
+            
                 self.level.__init__()
 
 
