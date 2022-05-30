@@ -37,7 +37,6 @@ class Level:
         self.magic_player = MagicPlayer(self.animation_player)
 
         self.game_paused = False
-        self.respawn = False
 
     def create_map(self):
 
@@ -148,7 +147,24 @@ class Level:
     def check_player_death(self):
         if self.player.health <= 0:
             self.player.kill()
-            self.respawn = True
+            
+            audio = pygame.mixer.Sound('audio\playerdeath.wav')
+            audio.set_volume(0.05)
+
+            screen = pygame.display.set_mode((WIDTH, HEIGHT))
+            alpha = 255
+            fade = pygame.Surface((WIDTH, HEIGHT))
+            fade.fill((183, 14, 14))
+            while alpha != 0:
+                if alpha == 255:
+                    audio.play()
+                fade.set_alpha(alpha)
+                screen.fill((0, 0, 0))
+                screen.blit(fade, (0, 0))
+                pygame.display.update()
+                alpha -= 1
+            
+            self.__init__()
 
     def gain_xp(self, amount):
         self.player.exp += amount
