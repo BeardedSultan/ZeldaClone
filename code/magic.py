@@ -9,7 +9,8 @@ class MagicPlayer:
         self.sounds = \
             {
                 'heal' : pygame.mixer.Sound('audio\heal.wav'),
-                'flame' : pygame.mixer.Sound('audio\Fire.wav')
+                'flame' : pygame.mixer.Sound('audio\Fire.wav'),
+                'ice' : pygame.mixer.Sound('audio\Fire.wav')
             }
 
     def heal(self, player, strength, cost, groups):
@@ -50,3 +51,23 @@ class MagicPlayer:
                 else:
                     offset_y = direction.y * i * TILESIZE
                     self.animation_player.create_particles('flame', player.rect.center + pygame.math.Vector2(randint(-TILESIZE // 3, TILESIZE // 3), offset_y + randint(-TILESIZE // 3, TILESIZE // 3)), groups)
+
+    def ice(self, player, strength, cost, groups):
+        if player.energy >= cost:
+            player.energy -= cost
+            self.sounds['flame'].set_volume(0.01)
+            self.sounds['flame'].play()
+
+        #ice animation
+            if player.status.split('_')[0] == 'right': direction = pygame.math.Vector2(1, 0)
+            elif player.status.split('_')[0] == 'left': direction = pygame.math.Vector2(-1, 0)
+            elif player.status.split('_')[0] == 'up': direction = pygame.math.Vector2(0, -1)
+            elif player.status.split('_')[0] == 'down': direction = pygame.math.Vector2(0, 1)
+
+            for i in range(1, 6):
+                if direction.x:
+                    offset_x = direction.x * i * TILESIZE
+                    self.animation_player.create_particles('ice', player.rect.center + pygame.math.Vector2(offset_x + randint(-TILESIZE // 3, TILESIZE // 3), randint(-TILESIZE // 3, TILESIZE // 3)), groups)
+                else:
+                    offset_y = direction.y * i * TILESIZE
+                    self.animation_player.create_particles('ice', player.rect.center + pygame.math.Vector2(randint(-TILESIZE // 3, TILESIZE // 3), offset_y + randint(-TILESIZE // 3, TILESIZE // 3)), groups)
